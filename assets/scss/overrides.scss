@@ -1,0 +1,21 @@
+.ant-tabs-bar {
+	width: 100%;
+}
+.ant-tabs-nav {
+	width: 100%;
+
+	div {
+		width: 100%;
+		display: flex;
+		justify-content: space-evenly;
+	}
+
+	.ant-tabs-tab {
+		text-align: center;
+		margin: 0;
+	}
+}
+
+.ant-page-header {
+	border-bottom: 2px solid #DDD;
+}
