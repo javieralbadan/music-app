@@ -36,6 +36,7 @@
 
 <script>
 import { LOGIN_FORM } from '~/plugins/form-validations'
+// import signIn from '~/endpoints/auth'
 
 export default {
 	name: 'FormLogin',
@@ -58,7 +59,9 @@ export default {
 					return false
 				}
 
-				alert('submit!')
+				// TODO: Create this method with error handler
+				// signIn()
+				this.$router.push('/home')
 			})
 		},
 	},

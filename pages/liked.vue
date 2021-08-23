@@ -8,5 +8,6 @@
 export default {
 	name: 'Liked',
 	layout: 'User',
+	// TODO: Validate session
 }
 </script>
