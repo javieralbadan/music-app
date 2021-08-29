@@ -1,15 +1,12 @@
 <template>
   <div>
-		<a-page-header title="Home · J Balvin music" />
+		<a-page-header title="Home" />
 
-		<a-input-search
-			v-model="filter"
-			placeholder="Filter your songs"
-			size="large"
-			@search="onFilter"
-		>
-			<a-button slot="enterButton" icon="filter" />
-    </a-input-search>
+		<HomeControls
+			:disabled="loading"
+			@load-songs="loadSongs"
+			@set-filter="setFilter"
+		/>
 
 		<div v-if="loading" class="wrap-loading">
 			<a-spin tip="Loading..." size="large" />
@@ -23,15 +20,12 @@
 			show-icon
 		/>
 
-		<a-list v-else item-layout="horizontal" :data-source="finalSongs">
-			<a-list-item slot="renderItem" slot-scope="item">
-				<a-button slot="actions" type="dashed" shape="circle" icon="heart" />
-				<a-list-item-meta :description="getArtists(item)">
-					<span slot="title">{{ item.name }}</span>
-					<a-avatar slot="avatar" :src="getAlbumImage(item)" />
-				</a-list-item-meta>
-			</a-list-item>
-		</a-list>
+		<SongsList
+			v-else
+			:filter="filter"
+			:songs="songs"
+			@set-offset="setOffset"
+		/>
 
 		<a-back-top />
 </div>
@@ -40,57 +34,49 @@
 <script>
 import { searchSongs } from '~/endpoints/songs'
 
-const DEFAULT_QUERY = 'J%20Balvin'
-
 export default {
 	name: 'Home',
+	components: {
+		HomeControls: () => import('~/components/utils/HomeControls.vue'),
+		SongsList: () => import('~/components/songs/SongsList.vue'),
+	},
 	layout: 'User',
 	// TODO: Validate session
 	data() {
 		return {
 			error: '',
-			loading: true,
-			songs: [],
 			filter: '',
+			loading: true,
+			pagination: {},
+			offset: 0,
+			query: '',
+			songs: [],
 		}
 	},
-	computed: {
-		finalSongs() {
-			if (!this.filter) {
-				return this.songs
-			}
-
-			return this.songs.filter(({ name }) => name.includes(this.filter))
-		},
-	},
-	created() {
-		this.loadSongs(DEFAULT_QUERY)
-	},
 	methods: {
-		async loadSongs(query) {
+		async loadSongs(newQuery) {
 			this.loading = true
+			if (newQuery) { this.query = newQuery }
 
-			const { data, error } = await searchSongs({ query })
+			const { offset, query } = this
+			const { data, error } = await searchSongs({ query, offset })
 			this.loading = false
+			this.error = error
+
 			if (!data || error) {
-				this.error = error
 				return
 			}
 
-			this.songs = data.tracks?.items || []
+			const { songs, pagination } = data || {}
+			this.songs = songs
+			this.pagination = pagination
 		},
-		onFilter() {
-			if (!this.filter) {
-				return
-			}
-
-			this.loadSongs(this.query)
+		setFilter(filter) {
+			this.filter = filter
 		},
-		getArtists({ artists }) {
-			return artists.map(({ name }) => name).join()
-		},
-		getAlbumImage({ album }) {
-			return album.images[0].url
+		setOffset(newOffset) {
+			this.offset = newOffset
+			this.loadSongs()
 		},
 	},
 }
