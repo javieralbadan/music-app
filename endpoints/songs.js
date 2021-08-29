@@ -1,4 +1,5 @@
 import { getToken } from './auth'
+import { songsTransform } from '~/transforms/songs'
 
 const BASE_URL = process.env.apiBaseUrl
 const TYPE = 'track'
@@ -25,7 +26,7 @@ export async function searchSongs({ query, type = TYPE, limit = LIMIT, offset = 
 			return { data: null, error: data.error.message }
 		}
 
-		return { data, error: null }
+		return { data: songsTransform(data), error: null }
 	} catch (error) {
 		return { data: null, error: 'There was an error retrieving songs' }
 	}
