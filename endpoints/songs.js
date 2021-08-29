@@ -1,4 +1,4 @@
-import { getToken } from './auth'
+import { getToken } from './token'
 import { songsTransform } from '~/transforms/songs'
 
 const BASE_URL = process.env.apiBaseUrl
