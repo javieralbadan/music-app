@@ -31,3 +31,33 @@ export async function searchSongs({ query, type = TYPE, limit = LIMIT, offset = 
 		return { data: null, error: 'There was an error retrieving songs' }
 	}
 }
+
+export function getLikedSongs() {
+	const songs = localStorage.getItem('likedSongs')
+
+	let data = []
+	if (songs) {
+		data = JSON.parse(songs)
+		data = Object.values(data)
+	}
+
+	return { data }
+}
+
+export function saveLikedSong(item) {
+	const songs = localStorage.getItem('likedSongs')
+
+	let parsedSongs = {}
+	if (songs) {
+		parsedSongs = JSON.parse(songs)
+	}
+
+	const finalObject = {
+		...parsedSongs,
+		[item.id]: item,
+	}
+	const objectToStore = JSON.stringify(finalObject)
+	localStorage.setItem('likedSongs', objectToStore)
+
+	return { data: Object.values(finalObject) }
+}

@@ -15,6 +15,7 @@ export function songsTransform(data) {
 			popularity: item.popularity,
 			artists: getArtists(item),
 			picture: getAlbumImage(item),
+			liked: false,
 		}
 	}) || []
 

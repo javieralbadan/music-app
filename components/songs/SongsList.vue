@@ -2,7 +2,14 @@
 	<div>
 		<a-list item-layout="horizontal" :data-source="finalSongs">
 			<a-list-item slot="renderItem" slot-scope="item">
-				<a-button slot="actions" type="dashed" shape="circle" icon="heart" />
+				<a-button
+					v-if="showLikeButton"
+					slot="actions"
+					shape="circle"
+					icon="heart"
+					:type="getType(item)"
+					@click="$emit('like-song', item)"
+				/>
 				<a-list-item-meta :description="item.artists">
 					<span slot="title">{{ item.name }}</span>
 					<a-avatar slot="avatar" :src="item.picture" />
@@ -10,20 +17,25 @@
 			</a-list-item>
 		</a-list>
 
-		<a-pagination
-			v-if="showPagination"
-			v-model="currentPagination"
-			:default-current="1"
-			:total="total"
-			:show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-			:page-size="20"
-			@change="onPaginate"
-		/>
+		<a-row type="flex" justify="center" align="middle" class="wrap-pagination">
+			<a-col :xs="24">
+				<a-pagination
+					v-if="showPagination"
+					:current="currentPagination"
+					:default-current="1"
+					:total="total"
+					:show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+					:page-size="20"
+					@change="onPaginate"
+				/>
+			</a-col>
+		</a-row>
 	</div>
 </template>
 
 <script>
 import Fuse from 'fuse.js'
+import { getLikedSongs } from '~/endpoints/songs'
 
 const LIMIT = 20
 const MAX_LIMIT_API = 1000
@@ -33,12 +45,13 @@ export default {
 	name: 'SongsList',
 	props: {
 		filter: { type: String, default: '' },
-		pagination: { type: Object, default: () => ({}) },
+		pagination: { type: Object, default: () => null },
 		songs: { type: Array, default: () => [] },
+		showLikeButton: Boolean,
 	},
 	data() {
 		return {
-			currentPagination: 1,
+			likedSongs: [],
 		}
 	},
 	computed: {
@@ -57,18 +70,48 @@ export default {
 			return results.map(({ item }) => item)
 		},
 		showPagination() {
-			return this.finalSongs.length && !this.filter
+			return this.pagination && this.finalSongs.length && !this.filter
 		},
 		total() {
 			return this.pagination.total <= MAX_LIMIT_API ? this.pagination.total : MAX_LIMIT_API
 		},
+		currentPagination() {
+			return this.pagination.offset / LIMIT || 1
+		},
+	},
+	created() {
+		this.getLikedSongs()
 	},
 	methods: {
+		getLikedSongs() {
+			const { data } = getLikedSongs()
+			this.likedSongs = data || []
+		},
 		onPaginate(newCurrent) {
-			this.currentPagination = newCurrent
-			const offset = (this.currentPagination - 1) * LIMIT
+			const offset = newCurrent * LIMIT
 			this.$emit('set-offset', offset)
+		},
+		getType({ liked, id: itemId }) {
+			const LIKED_STYLE = 'primary'
+			const NO_LIKED_STYLE = 'dashed'
+
+			if (liked) {
+				return LIKED_STYLE
+			}
+
+			const isLiked = this.likedSongs.find(({ id }) => itemId === id)
+			return isLiked ? LIKED_STYLE : NO_LIKED_STYLE
 		},
 	},
 }
 </script>
+
+<style lang="scss" scoped>
+.wrap-pagination {
+	margin: 1rem;
+
+	.ant-col {
+		text-align: center;
+	}
+}
+</style>

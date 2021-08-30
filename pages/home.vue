@@ -1,5 +1,5 @@
 <template>
-  <div>
+	<div>
 		<a-page-header title="Home" />
 
 		<HomeControls
@@ -14,16 +14,19 @@
 
 		<a-alert
 			v-else-if="error"
-			message="Error"
-			:description="error"
 			type="error"
+			message="Error"
 			show-icon
+			:description="error"
 		/>
 
 		<SongsList
 			v-else
 			:filter="filter"
 			:songs="songs"
+			:pagination="pagination"
+			show-like-button
+			@like-song="likeSong"
 			@set-offset="setOffset"
 		/>
 
@@ -32,16 +35,18 @@
 </template>
 
 <script>
-import { searchSongs } from '~/endpoints/songs'
+import { searchSongs, saveLikedSong } from '~/endpoints/songs'
 
 export default {
 	name: 'Home',
+	meta: {
+		requiresAuth: true,
+	},
 	components: {
 		HomeControls: () => import('~/components/utils/HomeControls.vue'),
 		SongsList: () => import('~/components/songs/SongsList.vue'),
 	},
 	layout: 'User',
-	// TODO: Validate session
 	data() {
 		return {
 			error: '',
@@ -56,7 +61,10 @@ export default {
 	methods: {
 		async loadSongs(newQuery) {
 			this.loading = true
-			if (newQuery) { this.query = newQuery }
+			if (newQuery) {
+				this.query = newQuery
+				this.offset = 0
+			}
 
 			const { offset, query } = this
 			const { data, error } = await searchSongs({ query, offset })
@@ -77,6 +85,17 @@ export default {
 		setOffset(newOffset) {
 			this.offset = newOffset
 			this.loadSongs()
+		},
+		async likeSong(item) {
+			const { data } = await saveLikedSong(item)
+			if (!data) {
+				return
+			}
+
+			const targetIndex = this.songs.findIndex(({ id }) => id === item.id)
+			if (targetIndex) {
+				this.songs[targetIndex].liked = true
+			}
 		},
 	},
 }
