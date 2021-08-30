@@ -11,6 +11,7 @@
 
 <script>
 export default {
+	name: 'UserLayout',
 	components: {
 		AppNav: () => import('~/components/layout/AppNav.vue'),
 	},

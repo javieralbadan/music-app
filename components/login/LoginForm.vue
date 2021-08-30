@@ -11,7 +11,7 @@
         placeholder="Username"
         @blur="updateOnBlur('user')"
       >
-        <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
+        <a-icon slot="prefix" type="user" style="color: #aaa" />
       </a-input>
     </a-form-model-item>
 
@@ -22,7 +22,7 @@
         placeholder="Password"
         @blur="updateOnBlur('password')"
       >
-        <a-icon slot="prefix" type="lock" style="color: rgba(0, 0, 0, 0.25)" />
+        <a-icon slot="prefix" type="lock" style="color: #aaa" />
       </a-input>
     </a-form-model-item>
 
@@ -36,15 +36,15 @@
 
 <script>
 import { LOGIN_FORM } from '~/plugins/form-validations'
-// import signIn from '~/endpoints/auth'
+import { signIn } from '~/endpoints/auth'
 
 export default {
 	name: 'FormLogin',
 	data() {
 		return {
 			form: {
-				user: '',
-				password: '',
+				user: 'javier.albadan',
+				password: '1233456',
 			},
 			rules: LOGIN_FORM,
 		}
@@ -59,10 +59,14 @@ export default {
 					return false
 				}
 
-				// TODO: Create this method with error handler
-				// signIn()
-				this.$router.push('/home')
+				this.logIn()
 			})
+		},
+		async logIn() {
+			const { user, password } = this.form
+			await signIn({ user, password })
+
+			this.$router.push('/home')
 		},
 	},
 }

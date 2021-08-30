@@ -24,18 +24,21 @@
 </template>
 
 <script>
-// import signIn from '~/endpoints/auth'
+import { getUser, signOut } from '~/endpoints/auth'
+import { getLikedSongs } from '~/endpoints/songs'
 
 export default {
 	name: 'User',
+	meta: {
+		requiresAuth: true,
+	},
 	layout: 'User',
-	// TODO: Validate session
 	data() {
 		return {
 			user: {
 				title: 'Username',
 				icon: 'user',
-				description: 'Username',
+				description: '',
 			},
 			password: {
 				title: 'Password',
@@ -45,7 +48,7 @@ export default {
 			likedSongs: {
 				title: 'Liked songs',
 				icon: 'heart',
-				description: '0',
+				description: '',
 			},
 		}
 	},
@@ -55,12 +58,20 @@ export default {
 		},
 	},
 	created() {
-		// TODO: Load from localStorage
+		this.getUserInfo()
+		this.getLikedSongs()
 	},
 	methods: {
+		getUserInfo() {
+			const { data } = getUser()
+			this.user.description = data
+		},
+		getLikedSongs() {
+			const { data } = getLikedSongs()
+			this.likedSongs.description = String(data.length)
+		},
 		logOut() {
-			// TODO: Create this method with error handler
-			// signOut()
+			signOut()
 			this.$router.push('/')
 		},
 	},
