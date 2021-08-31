@@ -11,8 +11,8 @@
 					@click="$emit('like-song', item)"
 				/>
 				<a-list-item-meta :description="item.artists">
-					<span slot="title">{{ item.name }}</span>
-					<a-avatar slot="avatar" :src="item.picture" />
+					<nuxt-link slot="title" :to="`/song/${item.id}`">{{ item.name }}</nuxt-link>
+					<a-avatar slot="avatar" :src="item.picture" :size="48" />
 				</a-list-item-meta>
 			</a-list-item>
 		</a-list>

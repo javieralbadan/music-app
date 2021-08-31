@@ -1,5 +1,5 @@
 import { getToken } from './token'
-import { songsTransform } from '~/transforms/songs'
+import { songsTransform, detailTransform } from '~/transforms/songs'
 
 const BASE_URL = process.env.apiBaseUrl
 const TYPE = 'track'
@@ -29,6 +29,33 @@ export async function searchSongs({ query, type = TYPE, limit = LIMIT, offset = 
 		return { data: songsTransform(data), error: null }
 	} catch (error) {
 		return { data: null, error: 'There was an error retrieving songs' }
+	}
+}
+
+export async function getDetailSong({ id }) {
+	const { data: accessToken, error } = await getToken()
+	if (error && !accessToken) {
+		return { data: null, error }
+	}
+
+	const headers = new Headers()
+	headers.append('Content-Type', 'application/json')
+	headers.append('Authorization', `Bearer ${accessToken}`)
+
+	try {
+		const response = await fetch(`${BASE_URL}/v1/tracks/${id}`, {
+			method: 'GET',
+			headers,
+		})
+		const data = await response.json()
+
+		if (response.status !== 200 && data.error) {
+			return { data: null, error: data.error.message }
+		}
+
+		return { data: detailTransform(data), error: null }
+	} catch (error) {
+		return { data: null, error: 'There was an error retrieving the song' }
 	}
 }
 
