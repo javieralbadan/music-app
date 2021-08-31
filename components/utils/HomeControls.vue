@@ -2,17 +2,19 @@
 	<a-row type="flex" justify="center" align="middle" class="wrap-controls">
     <a-col :xs="24" :sm="20" :md="18" :lg="16">
 			· Choose the singer ·
-			<a-button-group>
-				<a-button
-					v-for="(item, index) in singers"
-					:key="index"
-					:disabled="disabled"
-					:type="query === item ? 'primary' : 'dashed'"
-					@click="changeQuery(item)"
-				>
-					{{ item }}
-				</a-button>
-			</a-button-group>
+			<div class="wrap-singers">
+				<a-button-group>
+					<a-button
+						v-for="(item, index) in singers"
+						:key="index"
+						:disabled="disabled"
+						:type="query === item ? 'primary' : 'dashed'"
+						@click="changeQuery(item)"
+					>
+						{{ item }}
+					</a-button>
+				</a-button-group>
+			</div>
 
 			<a-input-search
 				v-model="filter"
@@ -60,6 +62,11 @@ export default {
 .wrap-controls {
 	.ant-col {
 		text-align: center;
+	}
+
+	.wrap-singers {
+		width: 100%;
+		overflow-x: auto;
 	}
 }
 </style>
